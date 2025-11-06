@@ -63,7 +63,7 @@ def callback(request: Request):
     code = request.query_params.get('code')
     token_info = sp_oauth.get_access_token(code)
     request.session['token_info'] = token_info
-    return RedirectResponse(url='http://localhost:3000') # Redirect to frontend
+    return RedirectResponse(url='https://playlist-analyser.vercel.app') # Redirect to frontend
 
 @app.get("/logout")
 def logout(request: Request):
