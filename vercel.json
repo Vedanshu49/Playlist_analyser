@@ -4,7 +4,11 @@
     {
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
-      "config": { "distDir": "build" }
+      "config": {
+        "installCommand": "npm install --prefix frontend",
+        "buildCommand": "npm run build --prefix frontend",
+        "outputDirectory": "frontend/build"
+      }
     },
     {
       "src": "backend/main.py",
@@ -14,14 +18,14 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "backend/main.py"
+      "dest": "/backend/main.py"
     },
     {
       "handle": "filesystem"
     },
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/frontend/build/index.html"
     }
   ]
 }
