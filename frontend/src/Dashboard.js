@@ -79,7 +79,6 @@ function Dashboard({ user }) {
   const [playlistUrl, setPlaylistUrl] = useState('');
   const [playlistData, setPlaylistData] = useState(null);
   const [trackData, setTrackData] = useState(null);
-  const [topPlaylists, setTopPlaylists] = useState(null);
   const [topArtists, setTopArtists] = useState(null);
   const [error, setError] = useState(null);
   const [aura, setAura] = useState('');
@@ -187,7 +186,7 @@ function Dashboard({ user }) {
       )}
       {aura && <h3>Playlist Aura: {aura}</h3>}
       {playlistData && topArtists && (
-        <UserCard owner={user} topPlaylists={topPlaylists} topArtists={topArtists} />
+        <UserCard owner={user} topArtists={topArtists} />
       )}
       {trackData && <Charts trackData={trackData} />}
     </AppContainer>
