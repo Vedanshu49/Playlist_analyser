@@ -16,19 +16,22 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/backend/main.py"
+      "dest": "backend/main.py"
     },
     {
       "src": "/login",
-      "dest": "/backend/main.py"
+      "dest": "backend/main.py"
     },
     {
       "src": "/callback",
-      "dest": "/backend/main.py"
+      "dest": "backend/main.py"
     },
     {
       "src": "/logout",
-      "dest": "/backend/main.py"
+      "dest": "backend/main.py"
+    },
+    {
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
