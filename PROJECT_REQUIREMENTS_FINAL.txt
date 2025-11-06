@@ -1,0 +1,106 @@
+SUBJECT: URGENT: Final Mandate & Non-Negotiable Feature Lock
+
+TO: Lead Developer (via AI Agent)
+
+This document supersedes all previous communications. These are the final, locked-in requirements for project acceptance. This is not a wishlist. This is the definition of a "done" project.
+
+Failure to implement any single point precisely as described below will be considered a total project failure and will result in immediate contract review and termination. The "job is gone" if this specification is not met 100%. "Close enough" is not acceptable. "It mostly works" is a failure.
+
+These features are mission-critical.
+
+CRITICAL BLOCK 1: Backend (Python) Requirements
+All API endpoints MUST be robust, efficient, and secure.
+
+Track Analysis API (Core Aura Feature):
+
+Mandate: Create a new, high-performance API endpoint.
+
+Function: This endpoint MUST accept a playlist ID and return detailed audio features for every single track in that playlist.
+
+Required Data: danceability, energy, valence, tempo.
+
+Non-Negotiable: This data is the foundation for the "Aura" and visualization features. If this API is slow, inaccurate, or fails, the entire frontend is useless.
+
+User's Top Content API:
+
+Mandate: Create two distinct endpoints.
+
+Functions:
+
+Get the playlist owner's top public playlists (Top 3 required).
+
+Get the playlist owner's most-listened-to artists (Top 3 required).
+
+Non-Negotiable: This is essential for the "Live User Card" feature.
+
+Robust Error Handling:
+
+Mandate: Re-implement comprehensive error handling across the entire backend.
+
+Non-Negotiable: The system MUST be robust. I expect graceful handling of failed API calls, invalid IDs, rate limits, or any other potential issue. The backend must never crash.
+
+CRITICAL BLOCK 2: Frontend (React) Requirements
+The user experience MUST be fluid, impressive, and exactly as specified.
+
+"Live User Card":
+
+Mandate: Implement the 3D-tilt "live effect" on the playlist owner's card on hover.
+
+Required Library: Use Framer Motion for this. Do not substitute.
+
+Function: This card MUST correctly fetch and display the owner's top 3 public playlists and top 3 artists from the new backend endpoints.
+
+"Aura" and Dynamic Visuals:
+
+Mandate: This is the key "wow" feature. It must be perfect.
+
+Function:
+
+The frontend MUST calculate the playlist's "Aura" (e.g., "Midnight Drive," "Sunrise Focus") based directly on the aggregated audio features from the Track Analysis API.
+
+The application background MUST dynamically change to a beautiful, generative gradient that visually represents this "Aura." It must be smooth, not a jarring snap.
+
+Interactive Data Charts:
+
+Mandate: Create animated, interactive charts for the playlist's audio features.
+
+Required Library: Use Recharts.
+
+Required Charts:
+
+Animated radial charts for Danceability, Energy, and Valence.
+
+A histogram for Tempo.
+
+Music Previews & Audio-Reactive Effects:
+
+Mandate: Allow users to play 30-second previews of tracks.
+
+Function: While a track preview is playing, the page MUST display a subtle, audio-reactive visual effect (e.g., a pulsing glow). This effect must feel connected to the music.
+
+CRITICAL BLOCK 3: Production & Security Standards
+This application MUST be "industry-level." A student project is not what I am paying for.
+
+Deployment:
+
+Mandate: The entire application (frontend and backend) MUST be fully scalable and deployed on Vercel.
+
+Non-Negotiable: "It works on my machine" is not acceptable. It must be 100% functional, live on Vercel.
+
+Scalability & Protocols:
+
+Mandate: Follow all industry-best protocols for code structure, state management, and API design. I expect this to be a fully scalable application.
+
+Security (ZERO-TOLERANCE):
+
+Mandate: Security is paramount. You MUST prevent all common vulnerabilities.
+
+Non-Negotiable: Any data leak, insecure endpoint, or vulnerability (XSS, CSRF, etc.) is an immediate, catastrophic failure and grounds for termination.
+
+FINAL WARNING:
+
+Read this document three times. This is the only path to project completion. Every feature must work exactly as described, adhere to the specified libraries, and meet all security and deployment standards.
+
+There will be no extensions and no excuses.
+
+If the final product delivered to me on Vercel does not match this specification in every detail, the work is considered incomplete and the job is gone.

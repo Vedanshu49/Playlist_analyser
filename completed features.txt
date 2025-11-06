@@ -1,0 +1,10 @@
+- Fetches and displays basic playlist information (name, owner, cover art).
+- Track Analysis API: Backend endpoint to fetch detailed audio features (danceability, energy, valence, tempo) for all tracks in a playlist.
+- User's Top Content API: Backend endpoints to fetch the playlist owner's top 3 public playlists and top 3 most-listened-to artists.
+- Robust Error Handling: Implemented comprehensive error handling in the backend to gracefully handle API errors and prevent crashes.
+- Implemented the "Live User Card" to fetch and display the owner's top 3 public playlists and top 3 artists.
+- Fully implemented the "Live User Card" with 3D-tilt effect and dynamic data fetching.
+- Implemented the "Aura" and Dynamic Visuals feature, which calculates the playlist's aura and dynamically changes the background gradient.
+- Implemented Interactive Data Charts (Animated radial charts and a histogram for Tempo) using Recharts.
+- Implemented Music Previews & Audio-Reactive Effects.
+- Created Vercel deployment configuration.
