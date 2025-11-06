@@ -19,8 +19,37 @@
       "destination": "/backend/main.py"
     },
     {
+      "source": "/callback",
+      "destination": "/backend/main.py"
+    },
+    {
+      "source": "/login",
+      "destination": "/backend/main.py"
+    },
+    {
+      "source": "/health",
+      "destination": "/backend/main.py"
+    },
+    {
       "source": "/(.*)",
-      "destination": "/"
+      "destination": "/frontend/build/index.html"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/frontend/build/static/$1"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/frontend/build/favicon.ico"
+    },
+    {
+      "src": "/manifest.json",
+      "dest": "/frontend/build/manifest.json"
+    },
+    {
+      "handle": "filesystem"
     }
   ]
 }

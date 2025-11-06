@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import Login from './Login';
 import Dashboard from './Dashboard';
+import NotFound from './NotFound';
+import ErrorBoundary from './ErrorBoundary';
+import Loading from './Loading';
+import useAPI from './hooks/useAPI';
 import styled from 'styled-components';
 
 const AppContainer = styled.div`
@@ -9,32 +14,83 @@ const AppContainer = styled.div`
     background-color: #282c34;
 `;
 
+// Configure axios defaults
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+axios.defaults.baseURL = API_URL;
+axios.defaults.withCredentials = true;
+axios.defaults.headers.common['X-CSRF-Token'] = true;
+
+// Add response interceptor for error handling
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401) {
+      // Handle unauthorized access
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const { fetchData, error: apiError } = useAPI();
 
   useEffect(() => {
+    const controller = new AbortController();
+    
     const fetchUser = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/me', { withCredentials: true });
-        setUser(response.data);
+        const data = await fetchData('/api/me', {
+          signal: controller.signal
+        });
+        setUser(data);
+        setError(null);
       } catch (error) {
-        setUser(null);
+        if (!axios.isCancel(error)) {
+          setUser(null);
+          setError(apiError || 'Failed to fetch user data');
+        }
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchUser();
-  }, []);
+    
+    return () => controller.abort();
+  }, [fetchData, apiError]);
 
   if (loading) {
     return <AppContainer><h1>Loading...</h1></AppContainer>;
   }
 
+  if (loading) {
+    return <Loading fullScreen text="Loading your profile..." />;
+  }
+
   return (
-    <AppContainer>
-      {user ? <Dashboard user={user} /> : <Login />}
-    </AppContainer>
+    <ErrorBoundary>
+      <Router>
+        <AppContainer>
+          <Routes>
+            <Route 
+              path="/" 
+              element={user ? <Dashboard user={user} /> : <Login />} 
+            />
+            <Route
+              path="/login"
+              element={user ? <Navigate to="/" /> : <Login />}
+            />
+            <Route path="/error" element={<Login error={error} />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AppContainer>
+      </Router>
+    </ErrorBoundary>
   );
 }
 
