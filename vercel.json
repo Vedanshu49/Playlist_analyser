@@ -13,34 +13,34 @@
       "use": "@vercel/python"
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "backend/main.py"
+      "source": "/api/(.*)",
+      "destination": "/backend/main.py"
     },
     {
-      "src": "/static/(.*)",
-      "dest": "frontend/build/static/$1"
+      "source": "/static/(.*)",
+      "destination": "/frontend/build/static/$1"
     },
     {
-      "src": "/manifest.json",
-      "dest": "frontend/build/manifest.json"
+      "source": "/manifest.json",
+      "destination": "/frontend/build/manifest.json"
     },
     {
-      "src": "/favicon.ico",
-      "dest": "frontend/build/favicon.ico"
+      "source": "/favicon.ico",
+      "destination": "/frontend/build/favicon.ico"
     },
     {
-      "src": "/logo192.png",
-      "dest": "frontend/build/logo192.png"
+      "source": "/logo192.png",
+      "destination": "/frontend/build/logo192.png"
     },
     {
-      "src": "/logo512.png",
-      "dest": "frontend/build/logo512.png"
+      "source": "/logo512.png",
+      "destination": "/frontend/build/logo512.png"
     },
     {
-      "src": "/(.*)",
-      "dest": "frontend/build/index.html"
+      "source": "/(.*)",
+      "destination": "/frontend/build/index.html"
     }
   ]
 }
