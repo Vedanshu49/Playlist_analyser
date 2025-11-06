@@ -1,4 +1,3 @@
-
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
@@ -16,7 +15,7 @@ const CardWrapper = styled(motion.div)`
   margin-top: 20px;
 `;
 
-const UserCard = ({ owner, topPlaylists, topArtists }) => {
+const UserCard = ({ owner, topArtists }) => {
   return (
     <CardWrapper
       whileHover={{ scale: 1.05, boxShadow: "0px 10px 20px rgba(0,0,0,0.2)" }}
@@ -28,15 +27,7 @@ const UserCard = ({ owner, topPlaylists, topArtists }) => {
         <h3>Top Artists</h3>
         <ul>
           {topArtists?.map(artist => (
-            <li key={artist.name}>{artist.name}</li>
-          ))}
-        </ul>
-      </div>
-      <div>
-        <h3>Top Playlists</h3>
-        <ul>
-          {topPlaylists?.map(playlist => (
-            <li key={playlist.id}>{playlist.name}</li>
+            <li key={artist.id}>{artist.name}</li>
           ))}
         </ul>
       </div>

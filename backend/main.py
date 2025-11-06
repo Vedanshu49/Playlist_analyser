@@ -1,22 +1,31 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 import os
 from dotenv import load_dotenv
 import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy.oauth2 import SpotifyOAuth
 from spotipy.exceptions import SpotifyException
+import uuid
 
 load_dotenv()
 
 SPOTIPY_CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 SPOTIPY_CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
+SPOTIPY_REDIRECT_URI = os.getenv("SPOTIPY_REDIRECT_URI")
 
 app = FastAPI()
+
+# This should be a secret key for session management
+SECRET_KEY = os.urandom(24).hex()
+
+app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
 # CORS (Cross-Origin Resource Sharing) middleware
 origins = [
     "http://localhost:3000",  # React app
-    "https://your-app-name.vercel.app", # TODO: Replace with your Vercel app URL
+    "https://playlist-analyser.vercel.app",
 ]
 
 app.add_middleware(
@@ -27,18 +36,80 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Define the scopes for the Spotify API
+SCOPE = "user-top-read playlist-read-private"
+
+def create_spotify_oauth():
+    return SpotifyOAuth(
+        client_id=SPOTIPY_CLIENT_ID,
+        client_secret=SPOTIPY_CLIENT_SECRET,
+        redirect_uri=SPOTIPY_REDIRECT_URI,
+        scope=SCOPE
+    )
+
 @app.get("/")
-def read_root():
-    return {"Hello": "World"}
+def read_root(request: Request):
+    return {"message": "Welcome to the Playlist Analyser API"}
+
+@app.get("/login")
+def login():
+    sp_oauth = create_spotify_oauth()
+    auth_url = sp_oauth.get_authorize_url()
+    return RedirectResponse(auth_url)
+
+@app.get("/callback")
+def callback(request: Request):
+    sp_oauth = create_spotify_oauth()
+    code = request.query_params.get('code')
+    token_info = sp_oauth.get_access_token(code)
+    request.session['token_info'] = token_info
+    return RedirectResponse(url='http://localhost:3000') # Redirect to frontend
+
+@app.get("/logout")
+def logout(request: Request):
+    request.session.clear()
+    return RedirectResponse(url='http://localhost:3000')
+
+@app.get("/api/me")
+def get_me(request: Request):
+    token_info = request.session.get('token_info', None)
+    if not token_info:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    sp = spotipy.Spotify(auth=token_info['access_token'])
+    try:
+        user = sp.current_user()
+        return user
+    except SpotifyException as e:
+        raise HTTPException(status_code=e.http_status, detail=e.msg)
+
+@app.get("/api/me/top-artists")
+def get_top_artists(request: Request):
+    token_info = request.session.get('token_info', None)
+    if not token_info:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    sp = spotipy.Spotify(auth=token_info['access_token'])
+    try:
+        top_artists = sp.current_user_top_artists(limit=10, time_range='medium_term')
+        return top_artists
+    except SpotifyException as e:
+        raise HTTPException(status_code=e.http_status, detail=e.msg)
+
 
 @app.get("/api/playlist/{playlist_id}")
-def get_playlist(playlist_id: str):
-    try:
-        client_credentials_manager = SpotifyClientCredentials(client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET)
-        sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-        
-        playlist = sp.playlist(playlist_id)
+def get_playlist(playlist_id: str, request: Request):
+    token_info = request.session.get('token_info', None)
+    
+    if token_info:
+        sp = spotipy.Spotify(auth=token_info['access_token'])
+    else:
+        # Fallback to client credentials flow if user is not logged in
+        auth_manager = spotipy.oauth2.SpotifyClientCredentials(client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET)
+        sp = spotipy.Spotify(auth_manager=auth_manager)
 
+    try:
+        playlist = sp.playlist(playlist_id)
         return {
             "name": playlist["name"],
             "owner": {
@@ -60,11 +131,17 @@ def get_playlist(playlist_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/playlist/{playlist_id}/tracks")
-def get_playlist_tracks(playlist_id: str):
-    try:
-        client_credentials_manager = SpotifyClientCredentials(client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET)
-        sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+def get_playlist_tracks(playlist_id: str, request: Request):
+    token_info = request.session.get('token_info', None)
 
+    if token_info:
+        sp = spotipy.Spotify(auth=token_info['access_token'])
+    else:
+        # Fallback to client credentials flow if user is not logged in
+        auth_manager = spotipy.oauth2.SpotifyClientCredentials(client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET)
+        sp = spotipy.Spotify(auth_manager=auth_manager)
+        
+    try:
         results = sp.playlist_tracks(playlist_id)
         tracks = results['items']
         while results['next']:
@@ -74,9 +151,7 @@ def get_playlist_tracks(playlist_id: str):
         track_ids = [track['track']['id'] for track in tracks if track['track'] and track['track']['id']]
         
         audio_features = sp.audio_features(track_ids)
-
         audio_features = [af for af in audio_features if af]
-
         audio_features_map = {af['id']: af for af in audio_features}
 
         track_data = []
@@ -96,70 +171,6 @@ def get_playlist_tracks(playlist_id: str):
                 })
 
         return track_data
-    except SpotifyException as e:
-        raise HTTPException(status_code=e.http_status, detail=e.msg)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/user/{user_id}/top-playlists")
-def get_user_top_playlists(user_id: str):
-    try:
-        client_credentials_manager = SpotifyClientCredentials(client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET)
-        sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-
-        playlists = sp.user_playlists(user_id)
-
-        top_playlists = []
-        for playlist in playlists['items'][:3]:
-            top_playlists.append({
-                "name": playlist['name'],
-                "id": playlist['id'],
-                "images": playlist['images']
-            })
-
-        return top_playlists
-    except SpotifyException as e:
-        raise HTTPException(status_code=e.http_status, detail=e.msg)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/user/{user_id}/top-artists")
-# TODO: This is a workaround to get the user's top artists without requiring user authentication.
-# The ideal solution would be to use the Spotify API's "Get User's Top Artists" endpoint,
-# but that would require the Spotify Authorization Code Flow, which is a significant
-# change to the application's architecture.
-def get_user_top_artists(user_id: str):
-    try:
-        client_credentials_manager = SpotifyClientCredentials(client_id=SPOTIPY_CLIENT_ID, client_secret=SPOTIPY_CLIENT_SECRET)
-        sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-
-        playlists = sp.user_playlists(user_id)
-        
-        artist_counts = {}
-
-        for playlist in playlists['items']:
-            results = sp.playlist_tracks(playlist['id'])
-            tracks = results['items']
-            while results['next']:
-                results = sp.next(results)
-                tracks.extend(results['items'])
-
-            for item in tracks:
-                track = item['track']
-                if track:
-                    for artist in track['artists']:
-                        if artist['id']:
-                            artist_id = artist['id']
-                            if artist_id in artist_counts:
-                                artist_counts[artist_id]['count'] += 1
-                            else:
-                                artist_counts[artist_id] = {'name': artist['name'], 'count': 1}
-
-        sorted_artists = sorted(artist_counts.values(), key=lambda x: x['count'], reverse=True)
-        
-        top_artists = [{'name': artist['name']} for artist in sorted_artists[:3]]
-
-        return top_artists
     except SpotifyException as e:
         raise HTTPException(status_code=e.http_status, detail=e.msg)
     except Exception as e:

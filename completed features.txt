@@ -8,3 +8,6 @@
 - Implemented Interactive Data Charts (Animated radial charts and a histogram for Tempo) using Recharts.
 - Implemented Music Previews & Audio-Reactive Effects.
 - Created Vercel deployment configuration.
+- Implemented Spotify Authorization Code Flow for user authentication.
+- Added login and logout functionality.
+- Enabled fetching of logged-in user's top artists.
