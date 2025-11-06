@@ -4,9 +4,7 @@
     {
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
-      "config": {
-        "distDir": "build"
-      }
+      "config": { "distDir": "build" }
     },
     {
       "src": "backend/main.py",
@@ -16,18 +14,6 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "backend/main.py"
-    },
-    {
-      "src": "/login",
-      "dest": "backend/main.py"
-    },
-    {
-      "src": "/callback",
-      "dest": "backend/main.py"
-    },
-    {
-      "src": "/logout",
       "dest": "backend/main.py"
     },
     {
