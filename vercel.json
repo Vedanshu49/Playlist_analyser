@@ -31,14 +31,6 @@
       "destination": "/frontend/build/favicon.ico"
     },
     {
-      "source": "/logo192.png",
-      "destination": "/frontend/build/logo192.png"
-    },
-    {
-      "source": "/logo512.png",
-      "destination": "/frontend/build/logo512.png"
-    },
-    {
       "source": "/(.*)",
       "destination": "/frontend/build/index.html"
     }
