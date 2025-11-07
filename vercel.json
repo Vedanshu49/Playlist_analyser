@@ -31,25 +31,22 @@
       "destination": "/backend/main.py"
     },
     {
+      "source": "/static/(.*)",
+      "destination": "/frontend/build/static/$1"
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": "/frontend/build/favicon.ico"
+    },
+    {
+      "source": "/manifest.json",
+      "destination": "/frontend/build/manifest.json"
+    },
+    {
       "source": "/(.*)",
       "destination": "/frontend/build/index.html"
     }
   ],
-  "routes": [
-    {
-      "src": "/static/(.*)",
-      "dest": "/frontend/build/static/$1"
-    },
-    {
-      "src": "/favicon.ico",
-      "dest": "/frontend/build/favicon.ico"
-    },
-    {
-      "src": "/manifest.json",
-      "dest": "/frontend/build/manifest.json"
-    },
-    {
-      "handle": "filesystem"
-    }
-  ]
+  "cleanUrls": true,
+  "trailingSlash": false
 }
