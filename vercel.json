@@ -9,7 +9,8 @@
       "src": "frontend/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "zeroConfig": true
+        "zeroConfig": true,
+        "outputDirectory": "build"
       }
     }
   ],
@@ -32,19 +33,19 @@
     },
     {
       "source": "/static/(.*)",
-      "destination": "/frontend/build/static/$1"
+      "destination": "/static/$1"
     },
     {
       "source": "/favicon.ico",
-      "destination": "/frontend/build/favicon.ico"
+      "destination": "/favicon.ico"
     },
     {
       "source": "/manifest.json",
-      "destination": "/frontend/build/manifest.json"
+      "destination": "/manifest.json"
     },
     {
       "source": "/(.*)",
-      "destination": "/frontend/build/index.html"
+      "destination": "/index.html"
     }
   ],
   "cleanUrls": true,
