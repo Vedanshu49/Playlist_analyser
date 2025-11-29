@@ -18,7 +18,9 @@ import uuid
 import logging
 from typing import Optional
 from datetime import datetime
-from health import HealthCheck
+from api.health import HealthCheck
+from api.middleware import CacheControlMiddleware, ResponseTimeMiddleware
+from api.schemas import PlaylistID, ErrorResponse
 
 # Load environment variables
 load_dotenv()
