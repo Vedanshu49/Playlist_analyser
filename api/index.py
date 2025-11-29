@@ -1,7 +1,9 @@
 from fastapi import FastAPI, HTTPException, Request, Depends, Path, Query
 from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import CSRFProtect
+from fastapi_csrf_protect import CsrfProtect
+from fastapi_csrf_protect.exceptions import CsrfProtectError
+from pydantic import BaseModel
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -16,6 +18,7 @@ import uuid
 import logging
 from typing import Optional
 from datetime import datetime
+from health import HealthCheck
 
 # Load environment variables
 load_dotenv()
@@ -34,6 +37,7 @@ SPOTIPY_REDIRECT_URI = os.getenv("SPOTIPY_REDIRECT_URI")
 SECRET_KEY = os.getenv("SECRET_KEY")
 FRONTEND_URL = os.getenv("FRONTEND_URL")
 PRODUCTION_URL = os.getenv("PRODUCTION_URL")
+API_VERSION = "1.0.0"
 
 if not SECRET_KEY:
     raise RuntimeError("SECRET_KEY environment variable is not set")
@@ -47,8 +51,17 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Security middleware
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
-csrf = CSRFProtect()
-app.add_middleware(csrf)
+
+@app.exception_handler(CsrfProtectError)
+def csrf_protect_exception_handler(request: Request, exc: CsrfProtectError):
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
+
+class CsrfSettings(BaseModel):
+    secret_key:str = SECRET_KEY
+
+@CsrfProtect.load_config
+def get_csrf_config():
+    return CsrfSettings()
 
 # CORS configuration
 origins = os.getenv("CORS_ORIGINS", "").split(",")
@@ -99,7 +112,7 @@ class ErrorHandlerMiddleware(BaseHTTPMiddleware):
 app.add_middleware(ErrorHandlerMiddleware)
 
 # Add caching and response time middleware
-from .middleware import CacheControlMiddleware, ResponseTimeMiddleware
+from middleware import CacheControlMiddleware, ResponseTimeMiddleware
 app.add_middleware(CacheControlMiddleware, cache_time=3600)  # 1 hour cache
 app.add_middleware(ResponseTimeMiddleware)
 
@@ -175,13 +188,13 @@ async def not_found_handler(request: Request, exc: HTTPException):
 def read_root(request: Request):
     return {"message": "Welcome to the Playlist Analyser API"}
 
-@app.get("/login")
+@app.get("/api/login")
 def login():
     sp_oauth = create_spotify_oauth()
     auth_url = sp_oauth.get_authorize_url()
     return RedirectResponse(auth_url)
 
-@app.get("/callback")
+@app.get("/api/callback")
 async def callback(request: Request):
     sp_oauth = create_spotify_oauth()
     error = request.query_params.get('error')
@@ -219,7 +232,7 @@ async def callback(request: Request):
         logger.exception("Error during callback processing")
         return RedirectResponse(url=f"{FRONTEND_URL}/error?message=Authentication error")
 
-@app.get("/logout")
+@app.get("/api/logout")
 def logout(request: Request):
     request.session.clear()
     return RedirectResponse(url='http://localhost:3000')
@@ -251,7 +264,7 @@ def get_top_artists(request: Request):
         raise HTTPException(status_code=e.http_status, detail=e.msg)
 
 
-from .schemas import PlaylistID, ErrorResponse
+from schemas import PlaylistID, ErrorResponse
 from datetime import datetime
 
 @app.get("/api/playlist/{playlist_id}")

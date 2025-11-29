@@ -43,7 +43,7 @@ function Login() {
     <LoginContainer>
         <Title>Playlist Analyser</Title>
         <Subtitle>Please login with your Spotify account to continue</Subtitle>
-      <Button href="http://127.0.0.1:8000/login">Login with Spotify</Button>
+      <Button href="/api/login">Login with Spotify</Button>
     </LoginContainer>
   );
 }

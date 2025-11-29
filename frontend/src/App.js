@@ -15,7 +15,7 @@ const AppContainer = styled.div`
 `;
 
 // Configure axios defaults
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_URL = '';
 axios.defaults.baseURL = API_URL;
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common['X-CSRF-Token'] = true;

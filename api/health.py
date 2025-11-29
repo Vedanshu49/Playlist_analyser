@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Dict
 
+STARTUP_TIME = datetime.now().timestamp()
+
 class HealthCheck:
     """Health check utility for the application"""
     

@@ -4,3 +4,5 @@ spotipy==2.25.1
 uvicorn
 requests
 starlette
+fastapi-csrf-protect
+slowapi

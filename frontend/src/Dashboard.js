@@ -86,7 +86,7 @@ function Dashboard({ user }) {
   useEffect(() => {
     const fetchTopArtists = async () => {
         try {
-            const response = await axios.get('http://127.0.0.1:8000/api/me/top-artists', { withCredentials: true });
+            const response = await axios.get('/api/me/top-artists', { withCredentials: true });
             setTopArtists(response.data.items);
         } catch (error) {
             console.error("Could not fetch top artists", error);
@@ -140,7 +140,7 @@ function Dashboard({ user }) {
     }
 
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/playlist/${extractedId}`, { withCredentials: true });
+      const response = await axios.get(`/api/playlist/${extractedId}`, { withCredentials: true });
       if (response.data.error) {
         setError(response.data.error);
         setPlaylistData(null);
@@ -148,7 +148,7 @@ function Dashboard({ user }) {
         setPlaylistData(response.data);
         setError(null);
 
-        const tracksResponse = await axios.get(`http://127.0.0.1:8000/api/playlist/${extractedId}/tracks`, { withCredentials: true });
+        const tracksResponse = await axios.get(`/api/playlist/${extractedId}/tracks`, { withCredentials: true });
         setTrackData(tracksResponse.data);
         const calculatedAura = calculateAura(tracksResponse.data);
         setAura(calculatedAura);
@@ -164,7 +164,7 @@ function Dashboard({ user }) {
 
   return (
     <AppContainer aura={aura}>
-        <LogoutButton href="http://127.0.0.1:8000/logout">Logout</LogoutButton>
+        <LogoutButton href="/api/logout">Logout</LogoutButton>
       <h1>Playlist Analyzer</h1>
       <p>Welcome, {user.display_name}!</p>
       <div>
