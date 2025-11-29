@@ -114,7 +114,7 @@ class ErrorHandlerMiddleware(BaseHTTPMiddleware):
 app.add_middleware(ErrorHandlerMiddleware)
 
 # Add caching and response time middleware
-from middleware import CacheControlMiddleware, ResponseTimeMiddleware
+from api.middleware import CacheControlMiddleware, ResponseTimeMiddleware
 app.add_middleware(CacheControlMiddleware, cache_time=3600)  # 1 hour cache
 app.add_middleware(ResponseTimeMiddleware)
 
@@ -266,7 +266,7 @@ def get_top_artists(request: Request):
         raise HTTPException(status_code=e.http_status, detail=e.msg)
 
 
-from schemas import PlaylistID, ErrorResponse
+from api.schemas import PlaylistID, ErrorResponse
 from datetime import datetime
 
 @app.get("/api/playlist/{playlist_id}")
